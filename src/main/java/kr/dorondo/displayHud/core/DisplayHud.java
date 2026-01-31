@@ -147,7 +147,7 @@ public abstract class DisplayHud {
 
         PacketSender.spawn(player,NMSid,uuid,getEntityType(),blocation);
         PacketSender.update(player,NMSid,SpigotConversionUtil.getEntityMetadata(getNMSdisplay().getBukkitEntity()));
-        mount();
+        //mount();
 
 
     }

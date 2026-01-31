@@ -23,7 +23,7 @@ public final class DisplayHud extends JavaPlugin {
             Bukkit.getPluginManager().registerEvents(new BukkitEventListener(this), this);
         }
 
-        getLogger().info("앙기무리");
+        //getLogger().info("displayhud");
     }
 
     public static DisplayHud getInstance() {

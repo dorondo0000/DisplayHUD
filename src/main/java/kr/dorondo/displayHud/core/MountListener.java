@@ -5,12 +5,14 @@ import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 public final class MountListener implements PacketListener {
 
@@ -27,9 +29,10 @@ public final class MountListener implements PacketListener {
 
         int[] passengers = wrapper.getPassengers();
         int[] extras = getHudIds(viewer);
+        int [] playerpassengers = viewer.getPassengers().stream().mapToInt(Entity::getEntityId).toArray();
         if (extras.length == 0) return;
 
-        wrapper.setPassengers(appendPassengers(passengers, extras));
+        wrapper.setPassengers(appendPassengers(passengers,playerpassengers ,extras));
 
         //Bukkit.getLogger().info(Arrays.toString(extras));
     }
@@ -54,14 +57,9 @@ public final class MountListener implements PacketListener {
         }
     }
 
-    private static int[] appendPassengers(int[] original, int... extras) {
-        LinkedHashSet<Integer> set = new LinkedHashSet<>();
-        for (int v : original) set.add(v);
-        for (int e : extras) set.add(e);
-
-        int[] res = new int[set.size()];
-        int i = 0;
-        for (int v : set) res[i++] = v;
-        return res;
+    private static int[] appendPassengers(int[] original, int[] passengers,int... extras) {
+        return IntStream.concat(Arrays.stream(original), IntStream.concat(Arrays.stream(passengers), Arrays.stream(extras)))
+                .distinct()
+                .toArray();
     }
 }

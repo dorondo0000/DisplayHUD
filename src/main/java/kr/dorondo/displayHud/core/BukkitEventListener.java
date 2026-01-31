@@ -1,6 +1,5 @@
 package kr.dorondo.displayHud.core;
 
-import kr.dorondo.displayHud.core.DisplayHud;
 import org.bukkit.entity.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -11,6 +10,8 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.Collection;
 
 public class BukkitEventListener implements Listener{
     private final kr.dorondo.displayHud.DisplayHud plugin;
@@ -27,10 +28,11 @@ public class BukkitEventListener implements Listener{
     public void onTeleport(PlayerTeleportEvent e) {
         Player p = e.getPlayer();
         runAfter3Ticks(() -> {
-            for (DisplayHud hud : DisplayHud.getHuds(p).values()) {
+            Collection<DisplayHud> huds = DisplayHud.getHuds(p).values();
+            for (DisplayHud hud : huds) {
                 hud.teleport();
-                hud.mount();
             }
+            huds.iterator().next().mount();
         });
     }
 
@@ -48,12 +50,12 @@ public class BukkitEventListener implements Listener{
     public void onRespawn(PlayerRespawnEvent e) {
         Player p = e.getPlayer();
         runAfter3Ticks(() -> {
-            for (DisplayHud hud : DisplayHud.getHuds(p).values()) {
-                if(!hud.removeWhenPlayerDied) { //필요없음 사실
-                    hud.teleport();
-                    hud.mount();
-                }
+            Collection<DisplayHud> huds = DisplayHud.getHuds(p).values();
+            for (DisplayHud hud : huds) {
+                hud.teleport();
             }
+            huds.iterator().next().mount();
+
         });
     }
 
@@ -61,9 +63,11 @@ public class BukkitEventListener implements Listener{
     public void onWorldChange(PlayerChangedWorldEvent e) {
         Player p = e.getPlayer();
         runAfter3Ticks(() -> {
-            for (DisplayHud hud : DisplayHud.getHuds(p).values()) {
+            Collection<DisplayHud> huds = DisplayHud.getHuds(p).values();
+            for (DisplayHud hud : huds) {
                 hud.respawn();
             }
+            huds.iterator().next().mount();
         });
     }
 
