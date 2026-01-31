@@ -1,5 +1,6 @@
 # DisplayHud
-Fake Display(packet) Plugin for DisplayHud
+DisplayHud is a project that allows display entities to be fixed to the player’s screen and used like a HUD by utilizing the resource pack’s core shaders.
+Through shader-based positioning, displays are rendered at a specific Y-offset below the player, making them appear anchored to the screen rather than the world.
 
 Versions: 1.21.8, 1.21.11<br>
 [packetevents](https://github.com/retrooper/packetevents) required<br>
