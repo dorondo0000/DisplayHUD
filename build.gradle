@@ -7,7 +7,7 @@ plugins {
 group = 'kr.dorondo'
 version = '1.5'
 
-def mc = "1.21.8"
+def mc = "1.21.9"
 def dic = (mc == "1.21.8") ? "D:\\Develop\\1.21.8플러그인개발\\plugins" : "D:\\Develop\\1.21.8플러그인개발\\plugins_otherversions"
 
 
