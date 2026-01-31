@@ -32,7 +32,7 @@ public class BukkitEventListener implements Listener{
             for (DisplayHud hud : huds) {
                 hud.teleport();
             }
-            huds.iterator().next().mount();
+            if(!huds.isEmpty()) huds.iterator().next().mount();
         });
     }
 
@@ -54,7 +54,7 @@ public class BukkitEventListener implements Listener{
             for (DisplayHud hud : huds) {
                 hud.teleport();
             }
-            huds.iterator().next().mount();
+            if(!huds.isEmpty()) huds.iterator().next().mount();
 
         });
     }
@@ -67,7 +67,7 @@ public class BukkitEventListener implements Listener{
             for (DisplayHud hud : huds) {
                 hud.respawn();
             }
-            huds.iterator().next().mount();
+            if(!huds.isEmpty()) huds.iterator().next().mount();
         });
     }
 

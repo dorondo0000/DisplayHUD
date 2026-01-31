@@ -1,5 +1,5 @@
 name: DisplayHud
-version: '1.5'
+version: '1.6'
 main: kr.dorondo.displayHud.DisplayHud
 api-version: '1.21'
 depend: [packetevents]

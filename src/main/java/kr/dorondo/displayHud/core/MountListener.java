@@ -33,8 +33,6 @@ public final class MountListener implements PacketListener {
         if (extras.length == 0) return;
 
         wrapper.setPassengers(appendPassengers(passengers,playerpassengers ,extras));
-
-        //Bukkit.getLogger().info(Arrays.toString(extras));
     }
 
     private static int[] getHudIds(Player player) {
