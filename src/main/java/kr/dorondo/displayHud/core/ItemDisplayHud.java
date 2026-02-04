@@ -34,7 +34,7 @@ public final class ItemDisplayHud extends DisplayHud{
     public void setItem(ItemStack itemstack){
         getNMSdisplay().setItemStack(net.minecraft.world.item.ItemStack.fromBukkitCopy(itemstack));
         setLocation(location);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public ItemStack getItem(){
@@ -47,7 +47,7 @@ public final class ItemDisplayHud extends DisplayHud{
 
     public void setItemTransform(String string){
         getNMSdisplay().setItemTransform(ItemDisplayContext.valueOf(string));
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     //get

@@ -23,11 +23,9 @@ public abstract class HudMover {
         Vector3f offset = new Vector3f(location).sub(origin.location);
         offset.z = 0;
 
-        List<DisplayHud> targets = new ArrayList<>(passengers.size() + 1);
-        targets.add(origin);
-        targets.addAll(passengers);
+        moveByOffset(origin, offset, time);
 
-        for (DisplayHud hud : targets) {
+        for (DisplayHud hud : passengers) {
             moveByOffset(hud, offset, time);
         }
 

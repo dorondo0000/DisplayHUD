@@ -88,6 +88,7 @@ public abstract class DisplayHud {
     protected HudAlignment alignment = HudAlignment.CENTER;
 
     protected boolean removeWhenPlayerDied = false;
+    protected boolean updateWhenDataChanged = true;
 
     protected Map<String,Object> ExtraData = new java.util.concurrent.ConcurrentHashMap<>();
 
@@ -205,6 +206,13 @@ public abstract class DisplayHud {
         removeWhenPlayerDied = toggle;
     }
 
+    public void updateWhenDataChanged(){
+        updateWhenDataChanged = true;
+    }
+    public void updateWhenDataChanged(boolean toggle){
+        updateWhenDataChanged = toggle;
+    }
+
     public Player getPlayer(){
         return this.player;
     }
@@ -275,7 +283,7 @@ public abstract class DisplayHud {
         getNMSdisplay().setTransformation(tf);
         getNMSdisplay().setTransformationInterpolationDelay(0);
         getNMSdisplay().setTransformationInterpolationDuration(time);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public Vector3f getLocation() {
@@ -302,7 +310,7 @@ public abstract class DisplayHud {
         getNMSdisplay().setTransformation(tf);
         getNMSdisplay().setTransformationInterpolationDelay(0);
         getNMSdisplay().setTransformationInterpolationDuration(time);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public Vector3f getScale() {
@@ -327,7 +335,7 @@ public abstract class DisplayHud {
         getNMSdisplay().setTransformation(tf);
         getNMSdisplay().setTransformationInterpolationDelay(0);
         getNMSdisplay().setTransformationInterpolationDuration(time);
-        update();
+        if(updateWhenDataChanged) update();
     }
     public Quaternionf getLeftRotation(){
         return new Quaternionf(Display.createTransformation(getNMSdisplay().getEntityData()).getLeftRotation());
@@ -355,7 +363,7 @@ public abstract class DisplayHud {
         getNMSdisplay().setTransformation(tf);
         getNMSdisplay().setTransformationInterpolationDelay(0);
         getNMSdisplay().setTransformationInterpolationDuration(time);
-        update();
+        if(updateWhenDataChanged) update();
     }
     public Quaternionf getRightRotation(){
         return new Quaternionf(Display.createTransformation(getNMSdisplay().getEntityData()).getRightRotation());
@@ -391,7 +399,7 @@ public abstract class DisplayHud {
 
     public void setInterpolationDuration(Integer n){
         getNMSdisplay().setTransformationInterpolationDuration(n);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public Integer getInterpolationDuration(){
@@ -400,7 +408,7 @@ public abstract class DisplayHud {
 
     public void setInterpolationDelay(Integer n){
         getNMSdisplay().setTransformationInterpolationDelay(n);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public Integer getInterpolationDelay(){
@@ -409,7 +417,7 @@ public abstract class DisplayHud {
 
     public void setBrightness(int block, int sky){
         getNMSdisplay().setBrightnessOverride(new Brightness(block,sky));
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public Integer getBrightnessBlock(){
@@ -422,7 +430,7 @@ public abstract class DisplayHud {
 
     public void setHeight(float height){
         getNMSdisplay().setHeight(height);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public float getHeight(){
@@ -431,7 +439,7 @@ public abstract class DisplayHud {
 
     public void setWidth(float width){
         getNMSdisplay().setWidth(width);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public float getWidth(){
@@ -440,7 +448,7 @@ public abstract class DisplayHud {
 
     public void setGlowColorOverride(int color){
         getNMSdisplay().setGlowColorOverride(color);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public int getGlowColorOverride(){
@@ -449,7 +457,7 @@ public abstract class DisplayHud {
 
     public void setViewRange(float viewRange){
         getNMSdisplay().setViewRange(viewRange);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public float getViewRange(){

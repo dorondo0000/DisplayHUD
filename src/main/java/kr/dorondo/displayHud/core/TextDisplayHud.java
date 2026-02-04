@@ -41,7 +41,7 @@ public final class TextDisplayHud extends DisplayHud{
         string += text;
         getNMSdisplay().setText(net.minecraft.network.chat.Component.literal(string));
         setLocation(location);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public void setText(Component component){
@@ -49,7 +49,7 @@ public final class TextDisplayHud extends DisplayHud{
         res = res.append(component);
         getNMSdisplay().setText(PaperAdventure.asVanilla(res));
         setLocation(location);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public String getText(){
@@ -73,7 +73,7 @@ public final class TextDisplayHud extends DisplayHud{
         byte FLAG = 1;
         byte flag = getNMSdisplay().getFlags();
         getNMSdisplay().setFlags((byte) (toggle? (flag|FLAG) : (flag&~FLAG)));
-        update();
+        if(updateWhenDataChanged) update();
     }
         /*
         public void setSeeThroughToggle(boolean toggle){
@@ -93,7 +93,7 @@ public final class TextDisplayHud extends DisplayHud{
         }
         getNMSdisplay().setFlags(flag);
         this.textAlignment = textAlignment;
-        update();
+        if(updateWhenDataChanged) update();
     }
 
         /*
@@ -133,7 +133,7 @@ public final class TextDisplayHud extends DisplayHud{
         } catch (Exception e) {
             throw new RuntimeException("exception", e);
         }
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public int getLineWidth(){
@@ -141,10 +141,16 @@ public final class TextDisplayHud extends DisplayHud{
     }
 
     public void setOpacity(int n){
-        if(n<0) n=0;
-        if(n>255) n=255;
-        getNMSdisplay().setTextOpacity((byte) (n - 256));
-        update();
+        setOpacity(n,0);
+    }
+
+    public void setOpacity(int n,Integer time){
+        n = Math.clamp(n, -128, 255);
+        if(n>127) n-=256;
+        getNMSdisplay().setTextOpacity((byte) n);
+        getNMSdisplay().setTransformationInterpolationDelay(0);
+        getNMSdisplay().setTransformationInterpolationDuration(time);
+        if(updateWhenDataChanged) update();
     }
 
     @Override
@@ -156,7 +162,7 @@ public final class TextDisplayHud extends DisplayHud{
         getNMSdisplay().setTransformation(tf);
         getNMSdisplay().setTransformationInterpolationDelay(0);
         getNMSdisplay().setTransformationInterpolationDuration(time);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public Vector3f getLocationVector(){

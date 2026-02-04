@@ -31,7 +31,7 @@ public final class BlockDisplayHud extends DisplayHud{
 
     public void setBlock(BlockState blockstate){
         getNMSdisplay().setBlockState((net.minecraft.world.level.block.state.BlockState) blockstate);
-        update();
+        if(updateWhenDataChanged) update();
     }
 
     public BlockState getBlock(){
