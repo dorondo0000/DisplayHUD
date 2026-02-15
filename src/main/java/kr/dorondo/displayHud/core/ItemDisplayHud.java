@@ -11,8 +11,8 @@ import org.bukkit.entity.ItemDisplay;
 import org.bukkit.inventory.ItemStack;
 import org.joml.Vector3f;
 
-public final class ItemDisplayHud extends DisplayHud{
-    protected Display.ItemDisplay NMSitemdisplay;
+public class ItemDisplayHud extends DisplayHud{
+    private Display.ItemDisplay NMSitemdisplay;
 
     public ItemDisplayHud() {
         setNMSdisplay(Bukkit.getWorlds().getFirst());

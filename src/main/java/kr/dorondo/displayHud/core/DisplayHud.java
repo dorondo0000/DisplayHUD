@@ -225,9 +225,7 @@ public abstract class DisplayHud {
         return this.uuid;
     }
 
-    public void setNMSdisplay(World world){
-        NMSdisplay = new ItemDisplay(net.minecraft.world.entity.EntityType.ITEM_DISPLAY,((CraftWorld) world).getHandle());
-    }
+    protected abstract void setNMSdisplay(World world);
 
     public Display getNMSdisplay(){
         return NMSdisplay;

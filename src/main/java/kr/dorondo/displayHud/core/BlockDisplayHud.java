@@ -9,7 +9,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.joml.Vector3f;
 
-public final class BlockDisplayHud extends DisplayHud{
+public class BlockDisplayHud extends DisplayHud{
     protected Display.BlockDisplay NMSblockdisplay;
 
     public BlockDisplayHud() {

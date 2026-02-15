@@ -15,7 +15,7 @@ import org.joml.Vector3f;
 
 import java.lang.reflect.Method;
 
-public final class TextDisplayHud extends DisplayHud{
+public class TextDisplayHud extends DisplayHud{
     protected Display.TextDisplay NMStextdisplay;
     protected TextDisplay.TextAlignment textAlignment = TextDisplay.TextAlignment.CENTER;
 
@@ -156,13 +156,7 @@ public final class TextDisplayHud extends DisplayHud{
     @Override
     public void setLeftRotation(Vector3f vector, Integer time) {
         vector.add(0,180,0);
-        Quaternionf quat = vecToQuat(vector);
-        Transformation tf = Display.createTransformation(getNMSdisplay().getEntityData());
-        tf = new Transformation(tf.getTranslation(),quat,tf.getScale(),tf.getRightRotation());
-        getNMSdisplay().setTransformation(tf);
-        getNMSdisplay().setTransformationInterpolationDelay(0);
-        getNMSdisplay().setTransformationInterpolationDuration(time);
-        if(updateWhenDataChanged) update();
+        super.setLeftRotation(vector,time);
     }
 
     public Vector3f getLocationVector(){
