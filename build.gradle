@@ -17,12 +17,10 @@ repositories {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
-    maven { url = "https://repo.glaremasters.me/repository/public/" } // PacketEvents
 }
 
 dependencies {
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:${mc}-R0.1-SNAPSHOT")
-    compileOnly("com.github.retrooper:packetevents-spigot:2.9.5")
 }
 
 paperweight {

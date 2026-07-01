@@ -1,11 +1,10 @@
 package kr.dorondo.displayHud.core;
 
-import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
-import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.mojang.math.Transformation;
 import io.papermc.paper.adventure.PaperAdventure;
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.EntityType;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -33,7 +32,7 @@ public class TextDisplayHud extends DisplayHud{
     }
 
     public EntityType getEntityType(){
-        return EntityTypes.TEXT_DISPLAY;
+        return EntityType.TEXT_DISPLAY;
     }
 
     public void setText(String text){

@@ -28,20 +28,27 @@ public class BukkitEventListener implements Listener{
     public void onTeleport(PlayerTeleportEvent e) {
         Player p = e.getPlayer();
         runAfter3Ticks(() -> {
-            Collection<DisplayHud> huds = DisplayHud.getHuds(p).values();
+            Collection<DisplayHud> huds = DisplayHud.getVisibleHuds(p);
             for (DisplayHud hud : huds) {
-                hud.teleport();
+                hud.teleportTo(p);
             }
-            if(!huds.isEmpty()) huds.iterator().next().mount();
+            DisplayHud.mountVisibleHuds(p);
         });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onDeath(PlayerDeathEvent e) {
         Player p = e.getPlayer();
-        for (DisplayHud hud : DisplayHud.getHuds(p).values()) {
+        for (DisplayHud hud : DisplayHud.getVisibleHuds(p)) {
             if(hud.removeWhenPlayerDied){
-                hud.remove();
+                if (hud.isGlobalHud()) {
+                    GlobalHud<?> globalHud = hud.getGlobalOwner();
+                    if (globalHud != null) {
+                        globalHud.hide(p);
+                    }
+                } else {
+                    hud.remove();
+                }
             }
         }
     }
@@ -50,11 +57,11 @@ public class BukkitEventListener implements Listener{
     public void onRespawn(PlayerRespawnEvent e) {
         Player p = e.getPlayer();
         runAfter3Ticks(() -> {
-            Collection<DisplayHud> huds = DisplayHud.getHuds(p).values();
+            Collection<DisplayHud> huds = DisplayHud.getVisibleHuds(p);
             for (DisplayHud hud : huds) {
-                hud.teleport();
+                hud.teleportTo(p);
             }
-            if(!huds.isEmpty()) huds.iterator().next().mount();
+            DisplayHud.mountVisibleHuds(p);
 
         });
     }
@@ -63,17 +70,18 @@ public class BukkitEventListener implements Listener{
     public void onWorldChange(PlayerChangedWorldEvent e) {
         Player p = e.getPlayer();
         runAfter3Ticks(() -> {
-            Collection<DisplayHud> huds = DisplayHud.getHuds(p).values();
+            Collection<DisplayHud> huds = DisplayHud.getVisibleHuds(p);
             for (DisplayHud hud : huds) {
-                hud.respawn();
+                hud.respawnTo(p);
             }
-            if(!huds.isEmpty()) huds.iterator().next().mount();
+            DisplayHud.mountVisibleHuds(p);
         });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuit(PlayerQuitEvent e) {
         DisplayHud.clearHuds(e.getPlayer());
+        GlobalHud.hideAll(e.getPlayer());
     }
 
 

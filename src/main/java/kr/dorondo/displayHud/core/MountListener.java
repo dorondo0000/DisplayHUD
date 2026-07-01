@@ -1,63 +1,47 @@
 package kr.dorondo.displayHud.core;
 
-import com.github.retrooper.packetevents.event.PacketListener;
-import com.github.retrooper.packetevents.event.PacketSendEvent;
-import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.IntStream;
 
-public final class MountListener implements PacketListener {
-
-    @Override
-    public void onPacketSend(PacketSendEvent event) {
-        if (event.getPacketType() != PacketType.Play.Server.SET_PASSENGERS) return;
-
-        WrapperPlayServerSetPassengers wrapper = new WrapperPlayServerSetPassengers(event);
-
-        Player viewer = toBukkitPlayer(event);
-        if (viewer == null) return;
-
-        if (viewer.getEntityId() != wrapper.getEntityId()) return;
-
-        int[] passengers = wrapper.getPassengers();
-        int[] extras = getHudIds(viewer);
-        int [] playerpassengers = viewer.getPassengers().stream().mapToInt(Entity::getEntityId).toArray();
-        if (extras.length == 0) return;
-
-        wrapper.setPassengers(appendPassengers(passengers,playerpassengers ,extras));
+public final class MountListener implements Listener {
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        NmsManager.inject(event.getPlayer());
     }
 
-    private static int[] getHudIds(Player player) {
-        return DisplayHud.getHuds(player).values().stream()
-                .map(DisplayHud::getNMSid)
-                .filter(Objects::nonNull)
-                .mapToInt(Integer::intValue)
-                .toArray();
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        NmsManager.uninject(event.getPlayer());
     }
 
-    private static Player toBukkitPlayer(PacketSendEvent event) {
-        Object p = event.getPlayer();
-        if (p instanceof Player bp) return bp;
+    static final class Handler extends ChannelDuplexHandler {
+        private final UUID playerUuid;
 
-        try {
-            UUID uuid = event.getUser().getUUID();
-            return Bukkit.getPlayer(uuid);
-        } catch (Throwable ignored) {
-            return null;
+        Handler(UUID playerUuid) {
+            this.playerUuid = playerUuid;
         }
-    }
 
-    private static int[] appendPassengers(int[] original, int[] passengers,int... extras) {
-        return IntStream.concat(Arrays.stream(original), IntStream.concat(Arrays.stream(passengers), Arrays.stream(extras)))
-                .distinct()
-                .toArray();
+        @Override
+        public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+            if (msg instanceof ClientboundSetPassengersPacket packet) {
+                Player player = Bukkit.getPlayer(playerUuid);
+                if (player != null) {
+                    super.write(ctx, msg, promise);
+                    NmsManager.handlePassengerPacket(player, packet);
+                    return;
+                }
+            }
+            super.write(ctx, msg, promise);
+        }
     }
 }

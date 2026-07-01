@@ -1,8 +1,7 @@
 package kr.dorondo.displayHud.core;
 
-import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
-import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -28,7 +27,7 @@ public class ItemDisplayHud extends DisplayHud{
     }
 
     public EntityType getEntityType(){
-        return EntityTypes.ITEM_DISPLAY;
+        return EntityType.ITEM_DISPLAY;
     }
 
     public void setItem(ItemStack itemstack){

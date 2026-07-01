@@ -1,8 +1,7 @@
 package kr.dorondo.displayHud.core;
 
-import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
-import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.EntityType;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
@@ -26,7 +25,7 @@ public class BlockDisplayHud extends DisplayHud{
     }
 
     public EntityType getEntityType(){
-        return EntityTypes.BLOCK_DISPLAY;
+        return EntityType.BLOCK_DISPLAY;
     }
 
     public void setBlock(BlockState blockstate){

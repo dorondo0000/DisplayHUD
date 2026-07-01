@@ -1,36 +1,17 @@
 package kr.dorondo.displayHud.core;
 
-import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
-import io.papermc.paper.adventure.PaperAdventure;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Brightness;
 import net.minecraft.world.entity.Display;
-import net.minecraft.world.entity.Display.ItemDisplay;
-import net.minecraft.world.entity.Display.TextDisplay;
-import net.minecraft.world.entity.Display.BlockDisplay;
-import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.entity.EntityType;
 import org.bukkit.World;
-import org.bukkit.block.BlockState;
-import org.bukkit.craftbukkit.CraftWorld;
-
-import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
-import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
-import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
-import io.github.retrooper.packetevents.util.SpigotConversionUtil;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.ItemDisplay.ItemDisplayTransform;
-import org.bukkit.entity.TextDisplay.TextAlignment;
 import com.mojang.math.Transformation;
-import org.bukkit.inventory.ItemStack;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.lang.reflect.Method;
 import java.util.*;
 
 public abstract class DisplayHud {
@@ -41,27 +22,25 @@ public abstract class DisplayHud {
         UNALIGNED
     }
 
-    private static WeakHashMap<Player, Map<String, DisplayHud>> HudRegistry = new WeakHashMap<>();
-
     public static DisplayHud getHud(Player player, String id) {
-        Objects.requireNonNull(player, "player");
-        Objects.requireNonNull(id, "id");
-
-        Map<String, DisplayHud> huds = HudRegistry.get(player);
-        if (huds == null) {
-            return null;
-        }
-        return huds.get(id);
+        return HudRegistry.getPersonalHud(player, id);
     }
 
     public static Map<String, DisplayHud> getHuds(Player player) {
-        Objects.requireNonNull(player, "player");
+        return HudRegistry.getPersonalHuds(player);
+    }
 
-        Map<String, DisplayHud> huds = HudRegistry.get(player);
-        if (huds == null || huds.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        return new HashMap<>(huds);
+    public static Collection<DisplayHud> getVisibleHuds(Player player) {
+        return HudRegistry.getVisibleHuds(player);
+    }
+
+    public static int[] getVisibleHudIds(Player player) {
+        return HudRegistry.getVisibleHudIds(player);
+    }
+
+    public static void mountVisibleHuds(Player player) {
+        Objects.requireNonNull(player, "player");
+        NmsManager.updateMount(player);
     }
 
     public static void removeHud(Player player,String id){
@@ -70,10 +49,14 @@ public abstract class DisplayHud {
     }
 
     public static void clearHuds(Player player) {
-        Objects.requireNonNull(player, "player");
-        Map<String, DisplayHud> huds = HudRegistry.remove(player);
-        if(huds == null)return;
-        huds.values().forEach(DisplayHud::remove);
+        HudRegistry.clearPersonalHuds(player);
+    }
+
+    private enum HudScope {
+        UNSPAWNED,
+        PERSONAL,
+        GLOBAL,
+        REMOVED
     }
 
     protected Player player;
@@ -82,6 +65,11 @@ public abstract class DisplayHud {
 
     protected Display NMSdisplay;
     protected Integer NMSid;
+
+    private final Set<Player> viewers = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private HudScope hudScope = HudScope.UNSPAWNED;
+    private GlobalHud<?> globalOwner;
+    private boolean defaultsInitialized = false;
 
     protected Vector3f location = new Vector3f(940f,540f,0f);
     protected Vector3f scale = new Vector3f(100f, 100f, 1f);
@@ -102,34 +90,23 @@ public abstract class DisplayHud {
     }
 
     public boolean spawn(Player player, String id, UUID uuid){
-        if(this.player != null){
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(uuid, "uuid");
+        if(hudScope != HudScope.UNSPAWNED || this.player != null){
             return false;
         }
-        Map<String, DisplayHud> map = HudRegistry.computeIfAbsent(player, v -> new HashMap<>());
-
-        if (map.containsKey(id)) {
+        if (!HudRegistry.registerPersonalHud(player, id, this)) {
             return false;
         }
 
-        map.put(id, this);
-
-        this.player = Objects.requireNonNull(player, "player");
-        this.id = Objects.requireNonNull(id, "id");
+        this.player = player;
+        this.id = id;
         this.uuid = uuid;
+        this.hudScope = HudScope.PERSONAL;
 
-        Location blocation = player.getLocation().clone();//.add(0,-4000,0); // x,z 청크 유지한채 y만 -4000으로 내려서 탑승 보강 삭제
-        blocation.setPitch(0);
-        blocation.setYaw(0);
-
-        PacketSender.spawn(player,NMSid,uuid,getEntityType(),blocation);
-
-
-        setLeftRotation(getLeftRotationVector());
-        setBrightness(15,15);
-        setScale(scale);
-        setLocation(location);
-        update();
-        mount();
+        initializeDefaults();
+        showTo(player);
 
 
         return true;
@@ -140,63 +117,155 @@ public abstract class DisplayHud {
     }
 
     public void respawn() {
-        PacketSender.remove(player,NMSid);
-
-        Location blocation = player.getLocation().clone();//.add(0,-4000,0); // x,z 청크 유지한채 y만 -4000으로 내려서 탑승 보강 삭제
-        blocation.setPitch(0);
-        blocation.setYaw(0);
-
-        PacketSender.spawn(player,NMSid,uuid,getEntityType(),blocation);
-        PacketSender.update(player,NMSid,SpigotConversionUtil.getEntityMetadata(getNMSdisplay().getBukkitEntity()));
-        //mount();
-
-
+        for (Player viewer : getViewers()) {
+            respawnTo(viewer);
+        }
     }
 
     public void remove() {
-        if(player == null) return;
-        PacketSender.remove(player,NMSid);
-        Map<String, DisplayHud> huds = HudRegistry.get(player);
-        if (huds == null) {
+        if (hudScope == HudScope.GLOBAL && globalOwner != null) {
+            globalOwner.remove();
             return;
         }
-        huds.remove(id);
-        if (huds.isEmpty()) {
-            HudRegistry.remove(player);
+        removePacketsFromViewers();
+        if (hudScope == HudScope.PERSONAL && player != null && id != null) {
+            HudRegistry.unregisterPersonalHud(player, id, this);
         }
+        hudScope = HudScope.REMOVED;
     }
 
     public void update(){
         if(id == null) return;
-        List<SynchedEntityData.DataValue<?>> pack = getNMSdisplay().getEntityData().packDirty();
-        if (pack == null) return;
-        if (pack.isEmpty()) return;
-        Set<Integer> dirtyIds = new HashSet<>();
-        for (SynchedEntityData.DataValue<?> dv : pack) {
-            dirtyIds.add(dv.id());
+        List<SynchedEntityData.DataValue<?>> metadata = getNMSdisplay().getEntityData().packDirty();
+        if (metadata == null || metadata.isEmpty()) return;
+        for (Player viewer : getViewers()) {
+            NmsManager.update(viewer,NMSid,metadata);
         }
-        List<EntityData<?>> metadata = new ArrayList<>(); //좀 애매한방식이긴한데 일단쓰기
-        for (EntityData<?> ed: SpigotConversionUtil.getEntityMetadata(getNMSdisplay().getBukkitEntity())){
-            if (dirtyIds.contains(ed.getIndex())) {
-                metadata.add(ed);
-            }
-        }
-        PacketSender.update(player,NMSid,metadata);
     }
 
 
     public void teleport(){
-        if(player == null) return;
-        Location location = player.getLocation().clone();
-        location.setYaw(0);
-        location.setPitch(0);
-        PacketSender.teleport(player,NMSid,location);
+        for (Player viewer : getViewers()) {
+            teleportTo(viewer);
+        }
     }
 
 
     public void mount() {
-        if(player == null) return;
-        PacketSender.mount(player,player.getEntityId(),NMSid);
+        for (Player viewer : getViewers()) {
+            mountTo(viewer);
+        }
+    }
+
+    boolean attachGlobal(GlobalHud<?> owner, String id, UUID uuid) {
+        Objects.requireNonNull(owner, "owner");
+        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(uuid, "uuid");
+        if (hudScope != HudScope.UNSPAWNED || this.player != null) {
+            return false;
+        }
+        this.id = id;
+        this.uuid = uuid;
+        this.globalOwner = owner;
+        this.hudScope = HudScope.GLOBAL;
+        initializeDefaults();
+        return true;
+    }
+
+    void removeGlobal() {
+        removePacketsFromViewers();
+        hudScope = HudScope.REMOVED;
+    }
+
+    boolean showTo(Player viewer) {
+        Objects.requireNonNull(viewer, "viewer");
+        if (uuid == null) {
+            uuid = UUID.randomUUID();
+        }
+        initializeDefaults();
+        if (!viewers.add(viewer)) {
+            return false;
+        }
+        Location location = viewer.getLocation().clone();
+        location.setPitch(0);
+        location.setYaw(0);
+        NmsManager.spawn(viewer,getNMSdisplay(),uuid,location);
+        sendFullUpdate(viewer);
+        mountTo(viewer);
+        return true;
+    }
+
+    boolean hideFrom(Player viewer) {
+        Objects.requireNonNull(viewer, "viewer");
+        if (!viewers.remove(viewer)) {
+            return false;
+        }
+        NmsManager.remove(viewer,NMSid);
+        NmsManager.updateMount(viewer);
+        return true;
+    }
+
+    void respawnTo(Player viewer) {
+        Objects.requireNonNull(viewer, "viewer");
+        if (!viewers.contains(viewer)) return;
+        NmsManager.remove(viewer,NMSid);
+        Location location = viewer.getLocation().clone();
+        location.setPitch(0);
+        location.setYaw(0);
+        NmsManager.spawn(viewer,getNMSdisplay(),uuid,location);
+        sendFullUpdate(viewer);
+        mountTo(viewer);
+    }
+
+    void teleportTo(Player viewer) {
+        Objects.requireNonNull(viewer, "viewer");
+        if (!viewers.contains(viewer)) return;
+        Location location = viewer.getLocation().clone();
+        location.setYaw(0);
+        location.setPitch(0);
+        NmsManager.teleport(viewer,NMSid,location);
+    }
+
+    void mountTo(Player viewer) {
+        Objects.requireNonNull(viewer, "viewer");
+        if (!viewers.contains(viewer)) return;
+        NmsManager.updateMount(viewer);
+    }
+
+    boolean isGlobalHud() {
+        return hudScope == HudScope.GLOBAL;
+    }
+
+    GlobalHud<?> getGlobalOwner() {
+        return globalOwner;
+    }
+
+    Set<Player> getViewers() {
+        return new LinkedHashSet<>(viewers);
+    }
+
+    private void removePacketsFromViewers() {
+        for (Player viewer : getViewers()) {
+            hideFrom(viewer);
+        }
+    }
+
+    private void initializeDefaults() {
+        if (defaultsInitialized) return;
+        boolean update = updateWhenDataChanged;
+        updateWhenDataChanged = false;
+        setLeftRotation(getLeftRotationVector());
+        setBrightness(15,15);
+        setScale(scale);
+        setLocation(location);
+        updateWhenDataChanged = update;
+        defaultsInitialized = true;
+    }
+
+    private void sendFullUpdate(Player viewer) {
+        List<SynchedEntityData.DataValue<?>> metadata = getNMSdisplay().getEntityData().packAll();
+        if (metadata == null || metadata.isEmpty()) return;
+        NmsManager.update(viewer,NMSid,metadata);
     }
 
     public void removeWhenPlayerDied(){
@@ -234,7 +303,7 @@ public abstract class DisplayHud {
     public Integer getNMSid() {return NMSid;}
 
     public EntityType getEntityType(){
-        return EntityTypes.DISPLAY;
+        return getNMSdisplay().getType();
     }
 
     public void setExtraData(String key, Object value) {
