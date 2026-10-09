@@ -18,7 +18,7 @@ wiki(update soon) : https://displayhud.gitbook.io/displayhud-docs/
 ![2026-01-12+05-23-25](https://github.com/user-attachments/assets/3545fff5-8a65-4b7d-9079-33f1885856c5)
 
 
-## Above hand (손 위 표시) - 2.2 Beta
+## Above hand - 2.2 Beta
 Vanilla clears the depth buffer right before it draws the first-person hand, so a HUD made of display entities is always covered by the hand / held item.
 With `setAboveHand(true)` a HUD element (item, text or block display) is drawn **on top of the hand**.
 
@@ -76,7 +76,7 @@ The resource pack has to know which pixels go over the hand. Two markers are acc
 - Another resource pack that also replaces `post_effect/entity_outline.json` and is placed above DisplayHud's pack turns above hand off. Merge them (next section).
 
 
-## 기존 발광(entity_outline) 셰이더와 병합하는 법 (merging with an existing glow shader)
+## Merging with an existing glow (entity_outline) shader
 If your server pack already has its own `assets/minecraft/post_effect/entity_outline.json`, only one of the two files can win. Put DisplayHud's two passes around **your** passes:
 
 1. Copy into your pack, from the overlay folder that matches your Minecraft version (`resourcepack/v1_21_8`, `v1_21_9` (1.21.9 ~ 1.21.11), `v26_1`, `v26_2`, `v26_3`; the GLSL syntax differs per version):
