@@ -22,7 +22,6 @@ out vec2 texCoord0;
 out vec2 texCoord1;
 out vec2 texCoord2;
 
-#moj_import <minecraft:globals.glsl> // DisplayHud
 #moj_import <minecraft:displayhud.glsl> // DisplayHud
 
 void main() {

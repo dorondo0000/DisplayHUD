@@ -9,7 +9,9 @@
 //   정렬: y 에 GAP 단위로 표시 (-1.5GAP 없음/stretch, -2.5GAP 왼쪽, -3.5GAP 가운데, -4.5GAP 오른쪽)
 //         정렬이 있으면 16:9 영역을 유지하고 남는 가로는 정렬 쪽으로 붙인다.
 //   깊이: Position.z / 1e6 (서버 location.z * 100 → 위에 그릴수록 z 를 크게)
-// Globals(ScreenSize) 가 먼저 포함돼 있어야 한다.
+// Projection(ProjMat) 이 먼저 포함돼 있어야 한다. 화면 비율은 ProjMat 에서 구한다.
+// Globals(ScreenSize) 는 쓰지 않는다: 바닐라 코어 셰이더(entity/item/text/block/outline)가 쓰지 않는 블록이라
+// OpenGL 에서 엔티티 렌더링이 깨진다(1인칭 팔 찌그러짐, 멀리 있는 스킨 검정). Vulkan 은 멀쩡해도 넣지 않는다.
 
 #define DISPLAYHUD_X 100.0
 #define DISPLAYHUD_Y 100.0
@@ -26,7 +28,8 @@ vec4 displayhud_clip(vec3 position) {
     pos.x *= -1.0;
     float offset = 0.0;
     if (position.y < -2.0 * DISPLAYHUD_GAP) {
-        float keep = (ScreenSize.y / 9.0 * 16.0) / ScreenSize.x; // 16:9 영역이 차지하는 가로 비율
+        float aspect = abs(ProjMat[1][1] / ProjMat[0][0]); // 화면 가로/세로 (원근 투영: [0][0] = f/aspect, [1][1] = f)
+        float keep = (16.0 / 9.0) / aspect;                // 16:9 영역이 차지하는 가로 비율
         if (position.y < -4.0 * DISPLAYHUD_GAP) {        // 오른쪽
             pos.y += 2.0 * DISPLAYHUD_GAP;
             offset = 1.0 - keep;

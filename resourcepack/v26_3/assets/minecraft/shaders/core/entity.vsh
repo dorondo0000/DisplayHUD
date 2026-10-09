@@ -47,7 +47,6 @@ layout(location = 6) out vec2 texCoord0;
 layout(location = 7) out vec2 texCoordGlint;
 #endif
 
-#include <minecraft:globals.glsl> // DisplayHud
 #include <minecraft:displayhud.glsl> // DisplayHud
 
 void main() {

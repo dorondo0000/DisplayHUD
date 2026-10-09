@@ -11,7 +11,6 @@ layout(location = 2) in vec2 UV0;
 layout(location = 0) out vec4 vertexColor;
 layout(location = 1) out vec2 texCoord0;
 
-#include <minecraft:globals.glsl> // DisplayHud
 #include <minecraft:displayhud.glsl> // DisplayHud
 
 void main() {

@@ -23,7 +23,8 @@ Vanilla clears the depth buffer right before it draws the first-person hand, so 
 With `setAboveHand(true)` a HUD element (item, text or block display) is drawn **on top of the hand**.
 
 > **Beta.** Implemented for every pack overlay (1.21.8 ~ 26.3). All shaders are validated offline against each version's vanilla shaders, but in-game testing is still in progress. Please report problems (version, graphics mode, GPU).<br>
-> Needs the **2.2 resource pack**. With an older pack the HUD simply stays under the hand.
+> Needs the **2.2 resource pack**. With an older pack the HUD simply stays under the hand.<br>
+> **OpenGL fix** (2.2 Beta pack re-uploaded): the core shaders no longer include `globals.glsl`. Vanilla entity / item / text / block / outline shaders don't use the `Globals` block, and adding it broke entity rendering with Graphics API = OpenGL on 26.3 (mangled first-person arm, black player skins). The screen aspect ratio for aligned HUDs now comes from the projection matrix. If you downloaded the 2.2 Beta pack before, download it again.
 
 ### Java
 ```java

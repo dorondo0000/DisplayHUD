@@ -10,7 +10,6 @@ in vec2 UV0;
 out vec4 vertexColor;
 out vec2 texCoord0;
 
-#moj_import <minecraft:globals.glsl> // DisplayHud
 #moj_import <minecraft:displayhud.glsl> // DisplayHud
 
 void main() {

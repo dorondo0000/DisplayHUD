@@ -41,7 +41,6 @@ out vec4 overlayColor;
 
 out vec2 texCoord0;
 
-#moj_import <minecraft:globals.glsl> // DisplayHud
 #moj_import <minecraft:displayhud.glsl> // DisplayHud
 
 void main() {

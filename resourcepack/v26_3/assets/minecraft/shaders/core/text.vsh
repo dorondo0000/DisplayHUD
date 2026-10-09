@@ -25,7 +25,6 @@ layout(location = 1) out float cylindricalVertexDistance;
 layout(location = 2) out vec4 vertexColor;
 layout(location = 3) out vec2 texCoord0;
 
-#include <minecraft:globals.glsl> // DisplayHud
 #include <minecraft:displayhud.glsl> // DisplayHud
 
 void main() {
