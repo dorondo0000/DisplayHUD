@@ -24,6 +24,7 @@ public final class MountListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         NmsManager.uninject(event.getPlayer());
+        AboveHandTrigger.forget(event.getPlayer());
     }
 
     static final class Handler extends ChannelDuplexHandler {

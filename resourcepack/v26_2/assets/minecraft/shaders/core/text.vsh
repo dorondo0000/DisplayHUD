@@ -43,6 +43,10 @@ void main() {
 #ifndef IS_GUI
     if (displayhud_is_hud(Position)) {
         gl_Position = displayhud_clip(Position);
+#if !defined(IS_SEE_THROUGH)
+        // DisplayHud 2.2: 손 위 표시 표식(밝기 block 1 / sky 2)이면 손보다 위로 올릴 전용 깊이 구간에 그린다
+        gl_Position.z = displayhud_above_hand_depth(gl_Position.z, UV2);
+#endif
         vertexColor = Color;
 #ifndef IS_SEE_THROUGH
         sphericalVertexDistance = 0.0;

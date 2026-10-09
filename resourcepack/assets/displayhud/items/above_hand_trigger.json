@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "displayhud:item/above_hand_trigger"
+  }
+}

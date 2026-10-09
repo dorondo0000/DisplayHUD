@@ -41,3 +41,18 @@ vec4 displayhud_clip(vec3 position) {
     pos.z = 0.5 - pos.z * (0.5 / DISPLAYHUD_DEPTH);
     return vec4(pos, 1.0);
 }
+
+// ── 손 위 표시 (DisplayHud 2.2 Beta) ──
+// 바닐라는 1인칭 손을 그리기 직전에 깊이를 지워서, 월드 엔티티인 HUD 는 항상 손에 가려진다.
+// setAboveHand(true) 인 HUD 는 서버가 밝기를 block 1 / sky 2 로 보낸다(UV2 = (16, 32), HUD 는 밝기를 쓰지 않는다).
+// 그 꼭짓점은 아무 월드 물체도 올 수 없는 아주 가까운 깊이 구간(역Z: 0.90 ~ 0.99)에 순서를 지켜 그리고,
+// post_effect/entity_outline.json 의 displayhud_capture 단계가 이 구간의 픽셀을 손을 그린 뒤 다시 덮는다.
+// 보통 HUD 깊이는 0.5 근처(location.z 1 당 5e-5). location.z -900 ~ 900 이 구간 안에서 순서가 지켜진다.
+#define DISPLAYHUD_ABOVE_HAND_LIGHT ivec2(16, 32)
+
+float displayhud_above_hand_depth(float z, ivec2 light) {
+    if (light != DISPLAYHUD_ABOVE_HAND_LIGHT) {
+        return z;
+    }
+    return 0.945 + clamp(z - 0.5, -0.045, 0.045);
+}

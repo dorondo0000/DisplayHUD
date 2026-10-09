@@ -1,4 +1,4 @@
 name: DisplayHud
-version: '2.1'
+version: '2.2-Beta'
 main: kr.dorondo.displayHud.DisplayHud
 api-version: '1.21'

@@ -32,6 +32,7 @@ public class BukkitEventListener implements Listener{
             for (DisplayHud hud : huds) {
                 hud.teleportTo(p);
             }
+            AboveHandTrigger.teleport(p);
             DisplayHud.mountVisibleHuds(p);
         });
     }
@@ -61,6 +62,7 @@ public class BukkitEventListener implements Listener{
             for (DisplayHud hud : huds) {
                 hud.teleportTo(p);
             }
+            AboveHandTrigger.teleport(p);
             DisplayHud.mountVisibleHuds(p);
 
         });
@@ -74,6 +76,7 @@ public class BukkitEventListener implements Listener{
             for (DisplayHud hud : huds) {
                 hud.respawnTo(p);
             }
+            AboveHandTrigger.respawn(p);
             DisplayHud.mountVisibleHuds(p);
         });
     }
@@ -82,6 +85,7 @@ public class BukkitEventListener implements Listener{
     public void onQuit(PlayerQuitEvent e) {
         DisplayHud.clearHuds(e.getPlayer());
         GlobalHud.hideAll(e.getPlayer());
+        AboveHandTrigger.forget(e.getPlayer());
     }
 
 

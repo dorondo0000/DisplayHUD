@@ -129,11 +129,14 @@ final class HudRegistry {
     }
 
     static int[] getVisibleHudIds(Player player) {
-        return getVisibleHuds(player).stream()
-                .map(DisplayHud::getNMSid)
-                .filter(Objects::nonNull)
-                .mapToInt(Integer::intValue)
-                .toArray();
+        List<Integer> ids = new ArrayList<>();
+        for (DisplayHud hud : getVisibleHuds(player)) {
+            if (hud.getNMSid() != null) ids.add(hud.getNMSid());
+        }
+        // 손 위 표시 트리거(레지스트리 밖)도 플레이어에게 태운다
+        Integer trigger = AboveHandTrigger.triggerId(player);
+        if (trigger != null) ids.add(trigger);
+        return ids.stream().mapToInt(Integer::intValue).toArray();
     }
 
     static void hideGlobalHuds(Player player) {

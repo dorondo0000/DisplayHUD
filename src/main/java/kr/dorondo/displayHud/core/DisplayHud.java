@@ -15,6 +15,19 @@ import org.joml.Vector3f;
 import java.util.*;
 
 public abstract class DisplayHud {
+    /**
+     * 손 위 표시(above hand) 표식 밝기. {@link #setAboveHand(boolean)} 가 켜진 HUD 는 밝기를 block 1 / sky 2 로 보낸다.
+     * HUD 셰이더는 밝기를 쓰지 않으므로 화면에는 영향이 없고, 리소스팩이 이 값을 보고 손 위로 올릴 HUD 를 알아본다.
+     * 리소스팩(include/displayhud.glsl 의 DISPLAYHUD_ABOVE_HAND_LIGHT = (16, 32))과 같아야 한다.
+     */
+    public static final int ABOVE_HAND_BLOCK_LIGHT = 1;
+    public static final int ABOVE_HAND_SKY_LIGHT = 2;
+    /**
+     * 예전 방식(발광 표식) 손 위 표시 색 0x01FEFD. 이 색으로 빛나는 아이템/블록 디스플레이 HUD 도 손 위로 올라간다.
+     * 손 위 표시 트리거도 이 색으로 빛난다(리소스팩이 이 색은 발광 테두리를 그리지 않는다).
+     */
+    public static final int ABOVE_HAND_GLOW_COLOR = 0x01FEFD;
+
     public enum HudAlignment {
         CENTER,
         LEFT,
@@ -70,6 +83,12 @@ public abstract class DisplayHud {
     private HudScope hudScope = HudScope.UNSPAWNED;
     private GlobalHud<?> globalOwner;
     private boolean defaultsInitialized = false;
+    /** 손 위 표시 트리거(내부용 투명 디스플레이)인지. */
+    boolean aboveHandTrigger = false;
+
+    protected boolean aboveHand = false;
+    protected int brightnessBlock = 15;
+    protected int brightnessSky = 15;
 
     protected Vector3f location = new Vector3f(940f,540f,0f);
     protected Vector3f scale = new Vector3f(100f, 100f, 1f);
@@ -119,6 +138,9 @@ public abstract class DisplayHud {
     public void respawn() {
         for (Player viewer : getViewers()) {
             respawnTo(viewer);
+            if (aboveHand) {
+                AboveHandTrigger.respawn(viewer);
+            }
         }
     }
 
@@ -192,6 +214,9 @@ public abstract class DisplayHud {
         NmsManager.spawn(viewer,getNMSdisplay(),uuid,location);
         sendFullUpdate(viewer);
         mountTo(viewer);
+        if (!aboveHandTrigger) {
+            AboveHandTrigger.refresh(viewer);
+        }
         return true;
     }
 
@@ -202,7 +227,14 @@ public abstract class DisplayHud {
         }
         NmsManager.remove(viewer,NMSid);
         NmsManager.updateMount(viewer);
+        if (!aboveHandTrigger) {
+            AboveHandTrigger.refresh(viewer);
+        }
         return true;
+    }
+
+    boolean isShownTo(Player viewer) {
+        return viewers.contains(viewer);
     }
 
     void respawnTo(Player viewer) {
@@ -255,7 +287,7 @@ public abstract class DisplayHud {
         boolean update = updateWhenDataChanged;
         updateWhenDataChanged = false;
         setLeftRotation(getLeftRotationVector());
-        setBrightness(15,15);
+        applyBrightness(); // 손 위 표시가 켜져 있으면 표식 밝기(1/2), 아니면 setBrightness 값(기본 15/15)
         setScale(scale);
         setLocation(location);
         updateWhenDataChanged = update;
@@ -482,17 +514,62 @@ public abstract class DisplayHud {
         return getNMSdisplay().getTransformationInterpolationDelay();
     }
 
+    /**
+     * 밝기 고정값. HUD 셰이더는 밝기를 쓰지 않으므로 보통은 화면에 영향이 없다(기본 15/15).
+     * 손 위 표시({@link #setAboveHand(boolean)})가 켜져 있는 동안에는 표식 밝기(block 1 / sky 2)가 유지되고,
+     * 여기서 넣은 값은 기억해 두었다가 손 위 표시를 끌 때 적용된다. block 1 / sky 2 는 손 위 표시 표식이라 쓰지 않는 게 좋다.
+     */
     public void setBrightness(int block, int sky){
-        getNMSdisplay().setBrightnessOverride(new Brightness(block,sky));
+        brightnessBlock = block;
+        brightnessSky = sky;
+        applyBrightness();
         if(updateWhenDataChanged) update();
     }
 
+    /** setBrightness 로 넣은 값(손 위 표시 표식이 아니라). */
     public Integer getBrightnessBlock(){
-        return getNMSdisplay().getBrightnessOverride().block();
+        return brightnessBlock;
     }
 
+    /** setBrightness 로 넣은 값(손 위 표시 표식이 아니라). */
     public Integer getBrightnessSky(){
-        return getNMSdisplay().getBrightnessOverride().sky();
+        return brightnessSky;
+    }
+
+    private void applyBrightness() {
+        getNMSdisplay().setBrightnessOverride(aboveHand
+                ? new Brightness(ABOVE_HAND_BLOCK_LIGHT, ABOVE_HAND_SKY_LIGHT)
+                : new Brightness(brightnessBlock, brightnessSky));
+    }
+
+    /**
+     * 손 위 표시 (2.2 Beta). true 면 이 HUD 가 1인칭 손/든 아이템에 가려지지 않고 그 위에 그려진다.
+     * 아이템/텍스트/블록 디스플레이 모두 된다. 밝기 표식(block 1 / sky 2)을 쓰므로 발광은 그대로 자유롭게 쓸 수 있다.
+     * 이 HUD 를 보는 플레이어에게는 손 위 표시 처리를 켜기 위한 투명 트리거 디스플레이가 하나 붙는다(자동 관리).
+     * DisplayHud 리소스팩(2.2 이상)이 필요하다.
+     */
+    public void setAboveHand(boolean aboveHand){
+        if (aboveHandTrigger || this.aboveHand == aboveHand) return;
+        this.aboveHand = aboveHand;
+        applyBrightness();
+        if(updateWhenDataChanged) update();
+        for (Player viewer : getViewers()) {
+            AboveHandTrigger.refresh(viewer);
+        }
+    }
+
+    public boolean isAboveHand(){
+        return aboveHand;
+    }
+
+    /** 바닐라 발광(외곽선). 색은 {@link #setGlowColorOverride(int)} (기본: 흰색). 손 위 표시와 같이 써도 된다. */
+    public void setGlowing(boolean glowing){
+        getNMSdisplay().setGlowingTag(glowing);
+        if(updateWhenDataChanged) update();
+    }
+
+    public boolean isGlowing(){
+        return getNMSdisplay().hasGlowingTag();
     }
 
     public void setHeight(float height){
