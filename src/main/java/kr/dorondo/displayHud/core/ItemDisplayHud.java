@@ -19,7 +19,7 @@ public class ItemDisplayHud extends DisplayHud{
     }
 
     public void setNMSdisplay(World world){
-        NMSitemdisplay = new Display.ItemDisplay(net.minecraft.world.entity.EntityType.ITEM_DISPLAY,((CraftWorld) world).getHandle());
+        NMSitemdisplay = new Display.ItemDisplay((net.minecraft.world.entity.EntityType<Display.ItemDisplay>) NmsCompat.entityType("ITEM_DISPLAY"),((CraftWorld) world).getHandle());
     }
 
     public Display.ItemDisplay getNMSdisplay(){
@@ -27,17 +27,17 @@ public class ItemDisplayHud extends DisplayHud{
     }
 
     public EntityType getEntityType(){
-        return EntityType.ITEM_DISPLAY;
+        return NmsCompat.entityType("ITEM_DISPLAY");
     }
 
     public void setItem(ItemStack itemstack){
-        getNMSdisplay().setItemStack(net.minecraft.world.item.ItemStack.fromBukkitCopy(itemstack));
+        getNMSdisplay().setItemStack(NmsCompat.toNms(itemstack));
         setLocation(location);
         if(updateWhenDataChanged) update();
     }
 
     public ItemStack getItem(){
-        return getNMSdisplay().getItemStack().asBukkitCopy();
+        return NmsCompat.toBukkit(getNMSdisplay().getItemStack());
     }
 
     public void setItemTransform(ItemDisplay.ItemDisplayTransform transform){

@@ -346,7 +346,7 @@ public abstract class DisplayHud {
         lv.y -= getAlignmentInt();
 
         Transformation tf = Display.createTransformation(getNMSdisplay().getEntityData());
-        tf = new Transformation(lv,tf.getLeftRotation(),tf.getScale(),tf.getRightRotation());
+        tf = NmsCompat.transformation(lv,NmsCompat.leftRotation(tf),NmsCompat.scale(tf),NmsCompat.rightRotation(tf));
         getNMSdisplay().setTransformation(tf);
         getNMSdisplay().setTransformationInterpolationDelay(0);
         getNMSdisplay().setTransformationInterpolationDuration(time);
@@ -373,7 +373,7 @@ public abstract class DisplayHud {
         Vector3f sv = getScaleVector();
 
         Transformation tf = Display.createTransformation(getNMSdisplay().getEntityData());
-        tf = new Transformation(tf.getTranslation(),tf.getLeftRotation(),sv,tf.getRightRotation());
+        tf = NmsCompat.transformation(NmsCompat.translation(tf),NmsCompat.leftRotation(tf),sv,NmsCompat.rightRotation(tf));
         getNMSdisplay().setTransformation(tf);
         getNMSdisplay().setTransformationInterpolationDelay(0);
         getNMSdisplay().setTransformationInterpolationDuration(time);
@@ -398,14 +398,14 @@ public abstract class DisplayHud {
     public void setLeftRotation(Vector3f vector,Integer time) {
         Quaternionf quat = vecToQuat(vector);
         Transformation tf = Display.createTransformation(getNMSdisplay().getEntityData());
-        tf = new Transformation(tf.getTranslation(),quat,tf.getScale(),tf.getRightRotation());
+        tf = NmsCompat.transformation(NmsCompat.translation(tf),quat,NmsCompat.scale(tf),NmsCompat.rightRotation(tf));
         getNMSdisplay().setTransformation(tf);
         getNMSdisplay().setTransformationInterpolationDelay(0);
         getNMSdisplay().setTransformationInterpolationDuration(time);
         if(updateWhenDataChanged) update();
     }
     public Quaternionf getLeftRotation(){
-        return new Quaternionf(Display.createTransformation(getNMSdisplay().getEntityData()).getLeftRotation());
+        return NmsCompat.leftRotation(Display.createTransformation(getNMSdisplay().getEntityData()));
     }
 
     public Vector3f getLeftRotationVector(){
@@ -426,14 +426,14 @@ public abstract class DisplayHud {
     public void setRightRotation(Vector3f vector,Integer time) {
         Quaternionf quat = vecToQuat(vector);
         Transformation tf = Display.createTransformation(getNMSdisplay().getEntityData());
-        tf = new Transformation(tf.getTranslation(),tf.getLeftRotation(),tf.getScale(),quat);
+        tf = NmsCompat.transformation(NmsCompat.translation(tf),NmsCompat.leftRotation(tf),NmsCompat.scale(tf),quat);
         getNMSdisplay().setTransformation(tf);
         getNMSdisplay().setTransformationInterpolationDelay(0);
         getNMSdisplay().setTransformationInterpolationDuration(time);
         if(updateWhenDataChanged) update();
     }
     public Quaternionf getRightRotation(){
-        return new Quaternionf(Display.createTransformation(getNMSdisplay().getEntityData()).getRightRotation());
+        return NmsCompat.rightRotation(Display.createTransformation(getNMSdisplay().getEntityData()));
     }
 
     public Vector3f getRightRotationVector(){

@@ -3,6 +3,8 @@ package kr.dorondo.displayHud.core;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -38,6 +40,19 @@ public final class MountListener implements Listener {
                 if (player != null) {
                     super.write(ctx, msg, promise);
                     NmsManager.handlePassengerPacket(player, packet);
+                    return;
+                }
+            }
+            if (msg instanceof ClientboundBundlePacket bundle) {
+                // 추적 시작 시 서버는 탑승 패킷을 번들 안에 넣어 보낸다. 그 안의 플레이어 탑승 패킷도 HUD 를 다시 태운다.
+                Player player = Bukkit.getPlayer(playerUuid);
+                if (player != null) {
+                    super.write(ctx, msg, promise);
+                    for (Packet<?> sub : bundle.subPackets()) {
+                        if (sub instanceof ClientboundSetPassengersPacket packet) {
+                            NmsManager.handlePassengerPacket(player, packet);
+                        }
+                    }
                     return;
                 }
             }

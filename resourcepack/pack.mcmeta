@@ -1,0 +1,18 @@
+{
+  "pack": {
+    "description": "DisplayHud 2.1 (1.21.8 ~ 26.3)",
+    "pack_format": 64,
+    "supported_formats": [64, 99],
+    "min_format": 64,
+    "max_format": 99
+  },
+  "overlays": {
+    "entries": [
+      { "directory": "v1_21_8", "formats": [64, 64], "min_format": 64, "max_format": 64 },
+      { "directory": "v1_21_9", "formats": [65, 83], "min_format": 65, "max_format": 83 },
+      { "directory": "v26_1", "formats": [84, 87], "min_format": 84, "max_format": 87 },
+      { "directory": "v26_2", "formats": [88, 96], "min_format": 88, "max_format": 96 },
+      { "directory": "v26_3", "formats": [97, 99], "min_format": 97, "max_format": 99 }
+    ]
+  }
+}

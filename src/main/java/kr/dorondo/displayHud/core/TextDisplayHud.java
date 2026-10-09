@@ -21,10 +21,12 @@ public class TextDisplayHud extends DisplayHud{
     public TextDisplayHud() {
         setNMSdisplay(Bukkit.getWorlds().getFirst());
         this.NMSid = getNMSdisplay().getId();
+        // 기본 배경(0x40000000)을 끈다. 26.3 부터 배경이 글자와 같은 셰이더로 그려져 HUD 위에 검은 판이 생긴다.
+        getNMSdisplay().getEntityData().set(Display.TextDisplay.DATA_BACKGROUND_COLOR_ID, 0);
     }
 
     public void setNMSdisplay(World world){
-        NMStextdisplay = new Display.TextDisplay(net.minecraft.world.entity.EntityType.TEXT_DISPLAY,((CraftWorld) world).getHandle());
+        NMStextdisplay = new Display.TextDisplay((net.minecraft.world.entity.EntityType<Display.TextDisplay>) NmsCompat.entityType("TEXT_DISPLAY"),((CraftWorld) world).getHandle());
     }
 
     public Display.TextDisplay getNMSdisplay(){
@@ -32,7 +34,7 @@ public class TextDisplayHud extends DisplayHud{
     }
 
     public EntityType getEntityType(){
-        return EntityType.TEXT_DISPLAY;
+        return NmsCompat.entityType("TEXT_DISPLAY");
     }
 
     public void setText(String text){
@@ -120,6 +122,19 @@ public class TextDisplayHud extends DisplayHud{
             getNMSdisplay().setFlags((byte) (flag|FLAG));
             update();
         }*/
+
+    /**
+     * 글자 뒤 배경색(ARGB). 0 이면 배경 없음(기본값).
+     * 26.3 이상에서만 HUD 위치에 그려진다(그 이전 버전은 배경이 별도 셰이더라 화면에 안 보인다).
+     */
+    public void setBackgroundColor(int argb){
+        getNMSdisplay().getEntityData().set(Display.TextDisplay.DATA_BACKGROUND_COLOR_ID, argb);
+        if(updateWhenDataChanged) update();
+    }
+
+    public int getBackgroundColor(){
+        return getNMSdisplay().getBackgroundColor();
+    }
 
     public void setLineWidth(int width){
         try {

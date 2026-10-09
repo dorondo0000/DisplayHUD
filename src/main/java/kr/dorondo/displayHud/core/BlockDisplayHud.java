@@ -17,7 +17,7 @@ public class BlockDisplayHud extends DisplayHud{
     }
 
     public void setNMSdisplay(World world){
-        NMSblockdisplay = new Display.BlockDisplay(net.minecraft.world.entity.EntityType.BLOCK_DISPLAY,((CraftWorld) world).getHandle());
+        NMSblockdisplay = new Display.BlockDisplay((net.minecraft.world.entity.EntityType<Display.BlockDisplay>) NmsCompat.entityType("BLOCK_DISPLAY"),((CraftWorld) world).getHandle());
     }
 
     public Display.BlockDisplay getNMSdisplay(){
@@ -25,7 +25,7 @@ public class BlockDisplayHud extends DisplayHud{
     }
 
     public EntityType getEntityType(){
-        return EntityType.BLOCK_DISPLAY;
+        return NmsCompat.entityType("BLOCK_DISPLAY");
     }
 
     public void setBlock(BlockState blockstate){
